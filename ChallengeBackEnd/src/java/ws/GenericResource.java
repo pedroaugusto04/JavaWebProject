@@ -2,6 +2,7 @@ package ws;
 
 import com.google.gson.Gson;
 import haversine.Haversine;
+import java.io.IOException;
 import java.util.Iterator;
 import system.dao.PartnerDAO;
 import javax.ws.rs.core.Context;
@@ -16,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 import system.model.Partner;
 import java.util.List;
 import javax.ws.rs.QueryParam;
+import system.controller.PartnerController;
 
 @Path("generic")
 public class GenericResource {
@@ -75,31 +77,9 @@ public class GenericResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("searchBestPartner/getLocalization/{address}")
-    public String searchBestPartner(@PathParam("address") String address) throws ClassNotFoundException {
-        // formating json to use Haversine
-        //GeometryJson g = new GeometryJson();
-        address = formatJson(address);
-        double addressArrayDouble[] = jsonToDoubleArray(address);
-        Partner bestPartner = null;
-
-        PartnerDAO pDao = new PartnerDAO();
-        List<Partner> listPartners = pDao.read();
-        Iterator<Partner> iter = listPartners.iterator();
-
-        // Calculating the shortest distance between the points with Haversine
-        double shorterDistance = Double.MAX_VALUE;
-        while (iter.hasNext()) {
-            Partner partner = iter.next();
-            String partnerAddress = formatJson(partner.getAddress());
-            double partnersAddressArrayDouble[] = jsonToDoubleArray(partnerAddress);
-            double haversineResult = Haversine.distanceInKm(addressArrayDouble[0], addressArrayDouble[1], partnersAddressArrayDouble[0],
-                    partnersAddressArrayDouble[1]);
-            if (shorterDistance > haversineResult) {
-                shorterDistance = haversineResult;
-                bestPartner = partner;
-            }
-        }
-
+    public String searchBestPartner(@PathParam("address") String address) throws ClassNotFoundException, IOException {
+        PartnerController partnerController = new PartnerController();
+        Partner bestPartner = partnerController.searchBestPartner(address);
         Gson g = new Gson();
         return g.toJson("Closest partner than you: " + g.toJson(bestPartner));
     }
