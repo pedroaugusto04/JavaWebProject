@@ -10,6 +10,19 @@ import system.dao.PartnerDAO;
 import system.model.Partner;
 
 public class PartnerController {
+    
+    private static PartnerController instance;
+    
+    private PartnerController(){
+        
+    }
+    
+    public static PartnerController getInstance(){
+        if (instance == null){
+            instance = new PartnerController();
+        }
+        return instance;
+    }
 
     public void createPartner(String tradingName, String ownerName, String document,
             String coverageArea, String address) throws ClassNotFoundException {
