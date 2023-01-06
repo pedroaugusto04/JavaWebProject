@@ -1,10 +1,7 @@
 package ws;
 
 import com.google.gson.Gson;
-import haversine.Haversine;
 import java.io.IOException;
-import java.util.Iterator;
-import system.dao.PartnerDAO;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
@@ -22,10 +19,13 @@ import system.controller.PartnerController;
 @Path("generic")
 public class GenericResource {
 
+    private PartnerController partnerController;
+
     @Context
     private UriInfo context;
 
     public GenericResource() {
+        this.partnerController = new PartnerController();
     }
 
     @PUT
@@ -37,20 +37,16 @@ public class GenericResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("Partner/get/{id}")
     public String getPartner(@PathParam("id") int id) throws ClassNotFoundException {
-        PartnerDAO pDao = new PartnerDAO();
-        Partner p = new Partner();
-        p.setId(id);
-        p = pDao.search(p);
+        Partner partner = partnerController.getPartner(id);
         Gson g = new Gson();
-        return g.toJson(p);
+        return g.toJson(partner);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getPartners/")
     public String getPartners() throws ClassNotFoundException {
-        PartnerDAO pDao = new PartnerDAO();
-        List<Partner> listPartners = pDao.read();
+        List<Partner> listPartners = partnerController.getPartners();
         Gson g = new Gson();
         return g.toJson(listPartners);
     }
@@ -63,14 +59,7 @@ public class GenericResource {
             @QueryParam("document") String document,
             @QueryParam("coverageArea") String coverageArea,
             @QueryParam("address") String address) throws ClassNotFoundException {
-        PartnerDAO pDao = new PartnerDAO();
-        Partner partner = new Partner();
-        partner.setTradingName(tradingName);
-        partner.setOwnerName(ownerName);
-        partner.setDocument(document);
-        partner.setCoverageArea(coverageArea);
-        partner.setAddress(address);
-        pDao.create(partner);
+        partnerController.createPartner(tradingName, ownerName, document, coverageArea, address);
         return "OK";
     }
 
@@ -78,28 +67,9 @@ public class GenericResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("searchBestPartner/getLocalization/{address}")
     public String searchBestPartner(@PathParam("address") String address) throws ClassNotFoundException, IOException {
-        PartnerController partnerController = new PartnerController();
         Partner bestPartner = partnerController.searchBestPartner(address);
         Gson g = new Gson();
         return g.toJson("Closest partner than you: " + g.toJson(bestPartner));
     }
 
-    public static String formatJson(String json) {
-        json = json.replaceAll("\\{", "");
-        json = json.replaceAll("}", "");
-        json = json.replaceAll("\\[", "");
-        json = json.replaceAll("]", "");
-        json = json.replaceAll("\".*?\":", "");
-        return json;
-    }
-
-    public static double[] jsonToDoubleArray(String json) {
-        String jsonArrayString[] = json.split(",");
-        double jsonArrayDouble[] = new double[jsonArrayString.length];
-
-        for (int i = 0; i < jsonArrayString.length; i++) {
-            jsonArrayDouble[i] = Double.parseDouble(jsonArrayString[i]);
-        }
-        return jsonArrayDouble;
-    }
 }

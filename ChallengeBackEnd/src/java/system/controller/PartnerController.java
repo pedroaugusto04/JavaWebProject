@@ -8,10 +8,34 @@ import java.util.List;
 //import org.locationtech.jts.geom.MultiPolygon;
 import system.dao.PartnerDAO;
 import system.model.Partner;
-import static ws.GenericResource.formatJson;
-import static ws.GenericResource.jsonToDoubleArray;
 
 public class PartnerController {
+
+    public void createPartner(String tradingName, String ownerName, String document,
+            String coverageArea, String address) throws ClassNotFoundException {
+        PartnerDAO pDao = new PartnerDAO();
+        Partner partner = new Partner();
+        partner.setTradingName(tradingName);
+        partner.setOwnerName(ownerName);
+        partner.setDocument(document);
+        partner.setCoverageArea(coverageArea);
+        partner.setAddress(address);
+        pDao.create(partner);
+    }
+
+    public Partner getPartner(int id) throws ClassNotFoundException {
+        PartnerDAO pDao = new PartnerDAO();
+        Partner partner = new Partner();
+        partner.setId(id);
+        partner = pDao.search(partner);
+        return partner;
+    }
+
+    public List<Partner> getPartners() throws ClassNotFoundException {
+        PartnerDAO pDao = new PartnerDAO();
+        List<Partner> listPartners = pDao.read();
+        return listPartners;
+    }
 
     public Partner searchBestPartner(String address) throws IOException, ClassNotFoundException {
         //formating json to use haversine
@@ -40,5 +64,24 @@ public class PartnerController {
             }
         }
         return bestPartner;
+    }
+
+    public static String formatJson(String json) {
+        json = json.replaceAll("\\{", "");
+        json = json.replaceAll("}", "");
+        json = json.replaceAll("\\[", "");
+        json = json.replaceAll("]", "");
+        json = json.replaceAll("\".*?\":", "");
+        return json;
+    }
+
+    public static double[] jsonToDoubleArray(String json) {
+        String jsonArrayString[] = json.split(",");
+        double jsonArrayDouble[] = new double[jsonArrayString.length];
+
+        for (int i = 0; i < jsonArrayString.length; i++) {
+            jsonArrayDouble[i] = Double.parseDouble(jsonArrayString[i]);
+        }
+        return jsonArrayDouble;
     }
 }

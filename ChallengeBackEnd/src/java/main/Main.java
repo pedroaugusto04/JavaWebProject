@@ -1,6 +1,5 @@
 package main;
 
-import haversine.Haversine;
 import system.dao.ConnectionFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
