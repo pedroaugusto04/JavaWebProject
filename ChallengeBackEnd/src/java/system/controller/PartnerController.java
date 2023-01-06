@@ -4,21 +4,23 @@ import haversine.Haversine;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-//import org.geotools.geojson.geom.GeometryJSON;
-//import org.locationtech.jts.geom.MultiPolygon;
+import org.geotools.geojson.geom.GeometryJSON;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import system.dao.PartnerDAO;
 import system.model.Partner;
 
 public class PartnerController {
-    
+
     private static PartnerController instance;
-    
-    private PartnerController(){
-        
+
+    private PartnerController() {
+
     }
-    
-    public static PartnerController getInstance(){
-        if (instance == null){
+
+    public static PartnerController getInstance() {
+        if (instance == null) {
             instance = new PartnerController();
         }
         return instance;
@@ -50,32 +52,39 @@ public class PartnerController {
         return listPartners;
     }
 
-    public Partner searchBestPartner(String address) throws IOException, ClassNotFoundException {
-        //formating json to use haversine
-        address = formatJson(address);
-
-        // Calculating the shortest distance between the points with Haversine
-        //GeometryJSON geoJSON = new GeometryJSON();
-        //MultiPolygon multiPolygon = geoJSON.readMultiPolygon(address);
-        double addressArrayDouble[] = jsonToDoubleArray(address);
-
-        Partner bestPartner = null;
+    public Partner searchBestPartner(String clientAddress) throws ClassNotFoundException, IOException {
         PartnerDAO pDao = new PartnerDAO();
         List<Partner> listPartners = pDao.read();
+        GeometryJSON geoJSON = new GeometryJSON();
         Iterator<Partner> iter = listPartners.iterator();
+        Point clientAddressPoint = geoJSON.readPoint(clientAddress);
 
+        clientAddress = formatJson(clientAddress);
+        double clientAddressArray[] = jsonToDoubleArray(clientAddress);
         double shorterDistance = Double.MAX_VALUE;
+        Partner bestPartner = null;
+
         while (iter.hasNext()) {
             Partner partner = iter.next();
-            String partnerAddress = formatJson(partner.getAddress());
-            double partnersAddressArrayDouble[] = jsonToDoubleArray(partnerAddress);
-            double haversineResult = Haversine.distanceInKm(addressArrayDouble[0], addressArrayDouble[1], partnersAddressArrayDouble[0],
-                    partnersAddressArrayDouble[1]);
-            if (shorterDistance > haversineResult) {
-                shorterDistance = haversineResult;
-                bestPartner = partner;
+            //formatting
+            String partnerAddressFormat = formatJson(partner.getAddress());
+            double partnersAddressArrayDouble[] = jsonToDoubleArray(partnerAddressFormat);
+
+            MultiPolygon coverageArea = geoJSON.readMultiPolygon(partner.getCoverageArea());
+            for (int i = 0; i < coverageArea.getNumGeometries(); i++) {
+                Polygon polygon = (Polygon) coverageArea.getGeometryN(i);
+                if (polygon.contains(clientAddressPoint)) {
+                    // calculating the shortest distance between the points (haversine)
+                    double haversineResult = Haversine.distanceInKm(clientAddressArray[0], clientAddressArray[1], partnersAddressArrayDouble[0],
+                            partnersAddressArrayDouble[1]);
+                    if (shorterDistance > haversineResult) {
+                        shorterDistance = haversineResult;
+                        bestPartner = partner;
+                    }
+                }
             }
         }
+
         return bestPartner;
     }
 
