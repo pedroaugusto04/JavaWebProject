@@ -12,13 +12,15 @@ import system.model.Partner;
 
 public class PartnerController {
 
+    private PartnerDAO pDao;
+
     private static PartnerController instance;
 
-    private PartnerController() {
-
+    private PartnerController() throws ClassNotFoundException {
+        this.pDao = PartnerDAO.getInstance();
     }
 
-    public static PartnerController getInstance() {
+    public static PartnerController getInstance() throws ClassNotFoundException {
         if (instance == null) {
             instance = new PartnerController();
         }
@@ -27,7 +29,6 @@ public class PartnerController {
 
     public void createPartner(String tradingName, String ownerName, String document,
             String coverageArea, String address) throws ClassNotFoundException {
-        PartnerDAO pDao = new PartnerDAO();
         Partner partner = new Partner();
         partner.setTradingName(tradingName);
         partner.setOwnerName(ownerName);
@@ -38,7 +39,6 @@ public class PartnerController {
     }
 
     public Partner getPartner(int id) throws ClassNotFoundException {
-        PartnerDAO pDao = new PartnerDAO();
         Partner partner = new Partner();
         partner.setId(id);
         partner = pDao.search(partner);
@@ -46,13 +46,11 @@ public class PartnerController {
     }
 
     public List<Partner> getPartners() throws ClassNotFoundException {
-        PartnerDAO pDao = new PartnerDAO();
         List<Partner> listPartners = pDao.read();
         return listPartners;
     }
 
     public Partner searchBestPartner(String clientAddress) throws ClassNotFoundException, IOException {
-        PartnerDAO pDao = new PartnerDAO();
         List<Partner> listPartners = pDao.read();
         Partner bestPartner = null;
         GeometryJSON geoJSON = new GeometryJSON();

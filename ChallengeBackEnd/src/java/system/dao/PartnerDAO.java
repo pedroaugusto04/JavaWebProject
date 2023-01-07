@@ -11,15 +11,23 @@ import java.util.List;
 public class PartnerDAO {
 
     private Connection connection;
+    private static PartnerDAO instance;
 
-    public PartnerDAO() throws ClassNotFoundException {
+    private PartnerDAO() throws ClassNotFoundException {
         this.connection = new ConnectionFactory().getConnection();
+    }
+
+    public static PartnerDAO getInstance() throws ClassNotFoundException {
+        if (instance == null) {
+            instance = new PartnerDAO();
+        }
+        return instance;
     }
 
     public void create(Partner partner) {
         String sql = "INSERT INTO partners"
                 + "(tradingName,ownerName,document,coverageArea,address)" + "values(?,?,?,ST_AsGeoJSON(ST_GeomFromGeoJSON(?)),"
-                + "ST_AsGeoJSON(ST_GeomFromGeoJSON(?)))"; // REDUZIR ESPAÇOS EM BRANCO ANTES DE CHEGAR AQUI
+                + "ST_AsGeoJSON(ST_GeomFromGeoJSON(?)))";
         try {
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setString(1, partner.getTradingName());
