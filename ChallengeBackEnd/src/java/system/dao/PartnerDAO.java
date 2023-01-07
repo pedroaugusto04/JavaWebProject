@@ -19,7 +19,7 @@ public class PartnerDAO {
     public void create(Partner partner) {
         String sql = "INSERT INTO partners"
                 + "(tradingName,ownerName,document,coverageArea,address)" + "values(?,?,?,ST_AsGeoJSON(ST_GeomFromGeoJSON(?)),"
-                + "ST_AsGeoJSON(ST_GeomFromGeoJSON(?)))";
+                + "ST_AsGeoJSON(ST_GeomFromGeoJSON(?)))"; // REDUZIR ESPAÇOS EM BRANCO ANTES DE CHEGAR AQUI
         try {
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setString(1, partner.getTradingName());

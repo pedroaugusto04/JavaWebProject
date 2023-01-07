@@ -25,7 +25,7 @@ public class GenericResource {
     private UriInfo context;
 
     public GenericResource() {
-        this.partnerController = new PartnerController();
+        this.partnerController = PartnerController.getInstance();
     }
 
     @PUT
@@ -69,6 +69,9 @@ public class GenericResource {
     public String searchBestPartner(@PathParam("address") String address) throws ClassNotFoundException, IOException {
         Partner bestPartner = partnerController.searchBestPartner(address);
         Gson g = new Gson();
+        if (bestPartner == null){
+            return g.toJson("No partner in coverage area"); // transform to exception
+        }
         return g.toJson("Closest partner than you: " + g.toJson(bestPartner));
     }
 

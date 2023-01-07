@@ -7,7 +7,6 @@ import java.util.List;
 import org.geotools.geojson.geom.GeometryJSON;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 import system.dao.PartnerDAO;
 import system.model.Partner;
 
@@ -55,14 +54,14 @@ public class PartnerController {
     public Partner searchBestPartner(String clientAddress) throws ClassNotFoundException, IOException {
         PartnerDAO pDao = new PartnerDAO();
         List<Partner> listPartners = pDao.read();
+        Partner bestPartner = null;
         GeometryJSON geoJSON = new GeometryJSON();
         Iterator<Partner> iter = listPartners.iterator();
         Point clientAddressPoint = geoJSON.readPoint(clientAddress);
+        double shorterDistance = Double.MAX_VALUE;
 
         clientAddress = formatJson(clientAddress);
         double clientAddressArray[] = jsonToDoubleArray(clientAddress);
-        double shorterDistance = Double.MAX_VALUE;
-        Partner bestPartner = null;
 
         while (iter.hasNext()) {
             Partner partner = iter.next();
@@ -71,16 +70,13 @@ public class PartnerController {
             double partnersAddressArrayDouble[] = jsonToDoubleArray(partnerAddressFormat);
 
             MultiPolygon coverageArea = geoJSON.readMultiPolygon(partner.getCoverageArea());
-            for (int i = 0; i < coverageArea.getNumGeometries(); i++) {
-                Polygon polygon = (Polygon) coverageArea.getGeometryN(i);
-                if (polygon.contains(clientAddressPoint)) {
-                    // calculating the shortest distance between the points (haversine)
-                    double haversineResult = Haversine.distanceInKm(clientAddressArray[0], clientAddressArray[1], partnersAddressArrayDouble[0],
-                            partnersAddressArrayDouble[1]);
-                    if (shorterDistance > haversineResult) {
-                        shorterDistance = haversineResult;
-                        bestPartner = partner;
-                    }
+            if (clientAddressPoint.within(coverageArea)) {
+                // calculating the shortest distance between the points (haversine)
+                double haversineResult = Haversine.distanceInKm(clientAddressArray[0], clientAddressArray[1], partnersAddressArrayDouble[0],
+                        partnersAddressArrayDouble[1]);
+                if (shorterDistance > haversineResult) {
+                    shorterDistance = haversineResult;
+                    bestPartner = partner;
                 }
             }
         }
