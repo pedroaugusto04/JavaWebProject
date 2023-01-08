@@ -1,12 +1,14 @@
 package system.controller;
 
-import haversine.Haversine;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import org.geotools.geojson.geom.GeometryJSON;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
+import static system.auxmethods.Format.formatJson;
+import static system.auxmethods.Format.jsonToDoubleArray;
+import static system.auxmethods.Haversine.shorterDistanceKm;
 import system.dao.PartnerDAO;
 import system.model.Partner;
 
@@ -14,17 +16,8 @@ public class PartnerController {
 
     private PartnerDAO pDao;
 
-    private static PartnerController instance;
-
-    private PartnerController() throws ClassNotFoundException {
-        this.pDao = PartnerDAO.getInstance();
-    }
-
-    public static PartnerController getInstance() throws ClassNotFoundException {
-        if (instance == null) {
-            instance = new PartnerController();
-        }
-        return instance;
+    public PartnerController() throws ClassNotFoundException {
+        this.pDao = new PartnerDAO();
     }
 
     public void createPartner(String tradingName, String ownerName, String document,
@@ -55,22 +48,24 @@ public class PartnerController {
         Partner bestPartner = null;
         GeometryJSON geoJSON = new GeometryJSON();
         Iterator<Partner> iter = listPartners.iterator();
-        Point clientAddressPoint = geoJSON.readPoint(clientAddress);
         double shorterDistance = Double.MAX_VALUE;
-
+        
+        Point clientAddressPoint = geoJSON.readPoint(clientAddress);
+       
         clientAddress = formatJson(clientAddress);
         double clientAddressArray[] = jsonToDoubleArray(clientAddress);
 
         while (iter.hasNext()) {
             Partner partner = iter.next();
+            MultiPolygon coverageArea = geoJSON.readMultiPolygon(partner.getCoverageArea());
+            
             //formatting
             String partnerAddressFormat = formatJson(partner.getAddress());
             double partnersAddressArrayDouble[] = jsonToDoubleArray(partnerAddressFormat);
 
-            MultiPolygon coverageArea = geoJSON.readMultiPolygon(partner.getCoverageArea());
             if (clientAddressPoint.within(coverageArea)) {
                 // calculating the shortest distance between the points (haversine)
-                double haversineResult = Haversine.distanceInKm(clientAddressArray[0], clientAddressArray[1], partnersAddressArrayDouble[0],
+                double haversineResult = shorterDistanceKm(clientAddressArray[0], clientAddressArray[1], partnersAddressArrayDouble[0],
                         partnersAddressArrayDouble[1]);
                 if (shorterDistance > haversineResult) {
                     shorterDistance = haversineResult;
@@ -82,22 +77,4 @@ public class PartnerController {
         return bestPartner;
     }
 
-    public static String formatJson(String json) {
-        json = json.replaceAll("\\{", "");
-        json = json.replaceAll("}", "");
-        json = json.replaceAll("\\[", "");
-        json = json.replaceAll("]", "");
-        json = json.replaceAll("\".*?\":", "");
-        return json;
-    }
-
-    public static double[] jsonToDoubleArray(String json) {
-        String jsonArrayString[] = json.split(",");
-        double jsonArrayDouble[] = new double[jsonArrayString.length];
-
-        for (int i = 0; i < jsonArrayString.length; i++) {
-            jsonArrayDouble[i] = Double.parseDouble(jsonArrayString[i]);
-        }
-        return jsonArrayDouble;
-    }
 }

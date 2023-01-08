@@ -11,18 +11,11 @@ import java.util.List;
 public class PartnerDAO {
 
     private Connection connection;
-    private static PartnerDAO instance;
 
-    private PartnerDAO() throws ClassNotFoundException {
+    public PartnerDAO() throws ClassNotFoundException {
         this.connection = new ConnectionFactory().getConnection();
     }
 
-    public static PartnerDAO getInstance() throws ClassNotFoundException {
-        if (instance == null) {
-            instance = new PartnerDAO();
-        }
-        return instance;
-    }
 
     public void create(Partner partner) {
         String sql = "INSERT INTO partners"
@@ -65,21 +58,6 @@ public class PartnerDAO {
         }
     }
 
-    /*public void update(Partner partner) {
-        String sql = "update partners set tradingName=?, ownerName=?, document=?,"
-                + "coverageArea= ST_AsGeoJSON(ST_GeomFromGeoJSON(?)), address=ST_AsGeoJSON(ST_GeomFromGeoJSON(?)) where id=?";
-        try {
-            PreparedStatement stmt = connection.prepareStatement(sql);
-            stmt.setString(1, partner.getNome());
-            stmt.setString(2, partner.getEmail());
-            stmt.setString(3, partner.getEndereco());
-            stmt.setLong(5, partner.getId());
-            stmt.execute();
-            stmt.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }*/
     public void delete(Partner partner) {
         try {
             PreparedStatement stmt = connection.prepareStatement("delete"

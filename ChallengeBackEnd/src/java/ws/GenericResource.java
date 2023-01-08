@@ -25,7 +25,7 @@ public class GenericResource {
     private UriInfo context;
 
     public GenericResource() throws ClassNotFoundException {
-        this.partnerController = PartnerController.getInstance();
+        this.partnerController = new PartnerController();
     }
 
     @PUT
@@ -35,7 +35,7 @@ public class GenericResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("Partner/get/{id}")
+    @Path("/get/partner/{id}")
     public String getPartner(@PathParam("id") int id) throws ClassNotFoundException {
         Partner partner = partnerController.getPartner(id);
         Gson g = new Gson();
@@ -44,7 +44,7 @@ public class GenericResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("getPartners/")
+    @Path("/get/partners/")
     public String getPartners() throws ClassNotFoundException {
         List<Partner> listPartners = partnerController.getPartners();
         Gson g = new Gson();
@@ -53,26 +53,26 @@ public class GenericResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("CreatePartner/")
+    @Path("/createPartner/")
     public String createPartner(@QueryParam("tradingName") String tradingName,
             @QueryParam("ownerName") String ownerName,
             @QueryParam("document") String document,
             @QueryParam("coverageArea") String coverageArea,
             @QueryParam("address") String address) throws ClassNotFoundException {
         partnerController.createPartner(tradingName, ownerName, document, coverageArea, address);
-        return "OK";
+        return "Partner successfully created";
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("searchBestPartner/getLocalization/{address}")
+    @Path("/searchBestPartner/get/{address}")
     public String searchBestPartner(@PathParam("address") String address) throws ClassNotFoundException, IOException {
         Partner bestPartner = partnerController.searchBestPartner(address);
         Gson g = new Gson();
         if (bestPartner == null) {
             return g.toJson("No partner in coverage area");
         }
-        return g.toJson("Closest partner than you: " + g.toJson(bestPartner));
+        return g.toJson(bestPartner);
     }
 
 }
