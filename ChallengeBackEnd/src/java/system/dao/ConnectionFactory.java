@@ -8,9 +8,9 @@ public class ConnectionFactory {
 
     public Connection getConnection() throws ClassNotFoundException {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            String url = "jdbc:mysql://localhost:3306/JavaChallengeProject?useTimeZone=true&serverTimezone=UTC&autoReconnect=true&useSSL=false";
-            return DriverManager.getConnection(url, "root", "Pedro@D17");
+            Class.forName("<yourDriver>");
+            String url = "<yourUrl>";
+            return DriverManager.getConnection(url, "<yourUser>", "<yourPassword>");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
