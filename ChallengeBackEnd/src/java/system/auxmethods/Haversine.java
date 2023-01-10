@@ -2,7 +2,7 @@ package system.auxmethods;
 
 public class Haversine {
 
-    public static double shorterDistanceKm(double iniLat, double iniLong, double finLat, double finLong) {
+    public static double shorterDistanceKm(double iniLong, double iniLat, double finLong, double finLat) {
         final int EARTH_RADIUS = 6371;
         double diffLong = Math.toRadians(finLong - iniLong);
         double diffLat = Math.toRadians(finLat - iniLat);
