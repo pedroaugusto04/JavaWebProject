@@ -59,6 +59,7 @@ public class GenericResource {
             @QueryParam("document") String document,
             @QueryParam("coverageArea") String coverageArea,
             @QueryParam("address") String address) throws ClassNotFoundException {
+        
         partnerController.createPartner(tradingName, ownerName, document, coverageArea, address);
         return "Partner successfully created";
     }
