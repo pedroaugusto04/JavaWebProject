@@ -16,7 +16,7 @@ import java.util.List;
 import javax.ws.rs.QueryParam;
 import system.controller.PartnerController;
 
-@Path("generic")
+@Path("api")
 public class GenericResource {
 
     private PartnerController partnerController;
@@ -35,7 +35,7 @@ public class GenericResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/get/partner/{id}")
+    @Path("/partners/{id}")
     public String getPartner(@PathParam("id") int id) throws ClassNotFoundException {
         Partner partner = partnerController.getPartner(id);
         Gson g = new Gson();
@@ -44,7 +44,7 @@ public class GenericResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/get/partners/")
+    @Path("/partners")
     public String getPartners() throws ClassNotFoundException {
         List<Partner> listPartners = partnerController.getPartners();
         Gson g = new Gson();
@@ -53,7 +53,7 @@ public class GenericResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/createPartner/")
+    @Path("/patners/create")
     public String createPartner(@QueryParam("tradingName") String tradingName,
             @QueryParam("ownerName") String ownerName,
             @QueryParam("document") String document,
@@ -65,7 +65,7 @@ public class GenericResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/searchBestPartner/get/{address}")
+    @Path("/partners/bestpartner/{address}")
     public String searchBestPartner(@PathParam("address") String address) throws ClassNotFoundException, IOException {
         Partner bestPartner = partnerController.searchBestPartner(address);
         Gson g = new Gson();
